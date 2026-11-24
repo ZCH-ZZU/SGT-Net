@@ -1,0 +1,28 @@
+# Generated datasets (several GB; regenerate with matlab/run_preprocessing.m)
+datasets/*.h5
+datasets/*.hdf5
+datasets/*.mat
+
+# Raw datasets (keep the folder placeholders and READMEs)
+data/public/*
+!data/public/.gitkeep
+data/stroke/*
+!data/stroke/.gitkeep
+
+# MATLAB
+*.asv
+*.m~
+matlab/tmp/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+python/results/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

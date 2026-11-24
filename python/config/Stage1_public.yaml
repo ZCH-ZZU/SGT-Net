@@ -1,0 +1,67 @@
+# Stage I: intra-subject 5-fold GroupKFold (healthy cohort)
+
+data:
+  h5_path: 'datasets/hybridBCI_Tn8.h5'
+  normalization: 'zscore'
+
+num_classes: 2
+
+experiment_axes:
+  task: ['MI', 'MA']
+  subjects: [[2,3]]
+  # Ablation options: ['EEG', 'HbO', 'HbR', 'meta1', 'meta2', 'meta3', 'meta4']
+  # meta1 = HbO + HbR; meta2 = HbR + EEG; meta3 = HbO + EEG;
+  # meta4 = HbO + HbR + EEG (default).
+  modalities: ['meta4']
+  # Ablation options: ['no_dts', 'dts']; dts = w/ DTS (default),
+  # no_dts = w/o DTS.
+  dts_type: ['dts']
+  # Ablation options: ['concat', 'co_attention', 'gated', 'lmf', 'tgca']
+  fusion_type: ['tgca']
+  use_group_kfold: [True]
+
+training:
+  n_splits: 5
+  n_repeats: 1
+  batch_size: 32
+  epochs: 100
+  learning_rate: 0.001
+  l1_lambda: 0.0
+  l2_weight_decay: 0.0001
+
+  validation_split:
+    method: 'default'
+    valid_ratio: 0.15
+
+  early_stopping:
+    enabled: true
+    patience: 15
+    delta: 0.0001
+    verbose: true
+
+  lr_scheduler:
+    enabled: true
+    name: 'ReduceLROnPlateau'
+    params: {mode: 'min', factor: 0.2, patience: 7, min_lr: 0.00001, verbose: true}
+    warmup: {enabled: true, multiplier: 1.0, epochs: 5}
+
+plotting:
+  history:
+    save_data: false
+    save_plot: false
+  confusion_matrix:
+    enabled: false
+    save_data: false
+    save_plot: false
+  cm_labels:
+    MI: ['LMI', 'RMI']
+    MA: ['MA', 'Rest']
+
+output_dir: 'results/Stage1_public'
+
+logging:
+  # Clear notebook cell output after each subject/target. No-op in a plain
+  # Python terminal.
+  clear_output: true
+  # Stage I only: also clear after each fold.
+  clear_fold: false

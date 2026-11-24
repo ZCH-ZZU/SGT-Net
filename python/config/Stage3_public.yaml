@@ -1,0 +1,62 @@
+# Stage III: few-shot target personalization (healthy cohort)
+
+data:
+  h5_path: 'datasets/hybridBCI_Tn8.h5'
+  normalization: 'zscore'
+
+num_classes: 2
+
+experiment:
+  task: ['MI', 'MA']
+  subjects: 'all'
+  # meta1 = HbO + HbR; meta2 = HbR + EEG; meta3 = HbO + EEG;
+  # meta4 = HbO + HbR + EEG (default).
+  modalities: 'meta4'
+  # dts = w/ DTS (default); no_dts = w/o DTS.
+  dts_type: 'dts'
+  fusion_type: 'tgca'
+
+  # Stage II checkpoints used as the pre-trained backbone.
+  # These folders exist only after Stage II has been run.
+  # Default (no source selection): the paths below are ready.
+  # If Stage II used source selection and you want the selected-source model,
+  # replace a path with the suffixed folder, e.g.
+  # MI: 'results/Stage2_public/MI_da_hierarchical_dcca_hybrid_soft_K10'
+  pretrained:
+    MI: 'results/Stage2_public/MI_da_hierarchical_dcca'
+    MA: 'results/Stage2_public/MA_da_hierarchical_dcca'
+
+  ft_method: ['none', 'linear_probing', 'full', 'lora', 'dora']
+  # N-shot: number of calibration trials per class.
+  shots: [2, 5, 10, 20, 40, 80]
+
+  lora_configs:
+    - {rank: 2, alpha: 8}
+  lora_dropout: 0.1
+  target_modules_list:
+    - 'input_proj,linear1,linear2,classifier_head'
+  seeds: [42, 1024, 2024]
+
+training:
+  batch_size: 8
+  epochs: 30
+  learning_rate: 0.001
+  l2_weight_decay: 0.01
+
+plotting:
+  confusion_matrix:
+    enabled: false
+    save_data: false
+    save_plot: false
+  cm_labels:
+    MI: ['LMI', 'RMI']
+    MA: ['MA', 'Rest']
+
+output_dir: 'results/Stage3_public'
+
+logging:
+  # Clear notebook cell output after each subject/target. No-op in a plain
+  # Python terminal.
+  clear_output: true
+  # Stage I only: also clear after each fold.
+  clear_fold: false

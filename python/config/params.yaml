@@ -1,0 +1,58 @@
+# Shared model parameters for all three stages.
+# Only the Transformer backbone and the five fusion variants used in the paper.
+
+trunk_params:
+  - dts_type: 'no_dts'
+    params:
+      EEG:
+        use_cnn: true
+        cnn_params: {kernel_size1: 32, kernel_size2: 16, pool_size1: 4, pool_size2: 2, out_channels: 16}
+        pe_type: 'spe'
+        d_model: 128
+        n_heads: 4
+        num_layers: 2
+        dropout: 0.3
+        use_dts: false
+      NIRS:
+        use_cnn: true
+        cnn_params: {kernel_size1: 5, kernel_size2: 3, pool_size1: 1, pool_size2: 1, out_channels: 8}
+        pe_type: 'spe'
+        d_model: 64
+        n_heads: 4
+        num_layers: 1
+        dropout: 0.2
+        use_dts: false
+
+  - dts_type: 'dts'
+    params:
+      EEG:
+        use_cnn: true
+        cnn_params: {kernel_size1: 32, kernel_size2: 16, pool_size1: 4, pool_size2: 2, out_channels: 16}
+        pe_type: 'spe'
+        d_model: 128
+        n_heads: 4
+        num_layers: 2
+        dropout: 0.3
+        use_dts: false
+      NIRS:
+        use_cnn: true
+        cnn_params: {kernel_size1: 5, kernel_size2: 3, pool_size1: 1, pool_size2: 1, out_channels: 8}
+        pe_type: 'spe'
+        d_model: 64
+        n_heads: 4
+        num_layers: 1
+        dropout: 0.2
+        use_dts: true
+        init_shift: 0.0
+
+fusion_params:
+  - fusion_type: 'concat'
+    params: {}
+  - fusion_type: 'co_attention'
+    params: {hidden_dim: 128}
+  - fusion_type: 'gated'
+    params: {hidden_dim: 128}
+  - fusion_type: 'lmf'
+    params: {rank: 64, dropout_rate: 0.5}
+  - fusion_type: 'tgca'
+    params: {hidden_dim: 128, n_heads: 4, temporal_window: 5, dropout: 0.3}

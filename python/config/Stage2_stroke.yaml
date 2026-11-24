@@ -1,0 +1,79 @@
+# Stage II: cross-subject LOSO adaptation (stroke cohort)
+
+data:
+  h5_path: 'datasets/stroke_patients_Tn8.h5'
+  normalization: 'zscore'
+
+num_classes: 2
+
+experiment:
+  task: ['MI']
+  subjects: 'all'
+  # meta1 = HbO + HbR; meta2 = HbR + EEG; meta3 = HbO + EEG;
+  # meta4 = HbO + HbR + EEG (default).
+  modalities: 'meta4'
+  # dts = w/ DTS (default); no_dts = w/o DTS.
+  dts_type: 'dts'
+  fusion_type: 'tgca'
+
+  strategies:
+    - 'source_only'
+    - 'da_mmd'
+    - 'da_coral'
+    - 'da_hierarchical'
+    - 'da_coral_dcca'
+    - 'da_mmd_dcca'
+    - 'da_hierarchical_dcca'
+
+  lambda_da_settings: {MI: 0.05, MA: 0.05}
+  lambda_dcca: 0.05
+
+  source_selection:
+    enabled: false
+    methods: ['data', 'performance', 'hybrid']
+    modes: ['hard', 'soft']
+    top_k: {hard: [1, 5, 10], soft: ['all']}
+    run_baseline_control: true
+    # Produced only after Stage I has been run.
+    performance_csv:
+      MI: 'results/Stage1_stroke/MI_dts_meta4_tgca/MI_dts_meta4_tgca_Summary.csv'
+
+training:
+  batch_size: 32
+  epochs: 40
+  learning_rate: 0.001
+  l2_weight_decay: 0.001
+  validation_split:
+    valid_ratio: 0.15
+  early_stopping:
+    enabled: true
+    patience: 10
+    delta: 0.0001
+    verbose: true
+  lr_scheduler:
+    enabled: true
+    name: 'ReduceLROnPlateau'
+    params: {mode: 'min', factor: 0.5, patience: 5, min_lr: 0.00001, verbose: true}
+    warmup: {enabled: true, multiplier: 1.0, epochs: 5}
+
+plotting:
+  history:
+    save_data: false
+    save_plot: false
+  confusion_matrix:
+    enabled: false
+    save_data: false
+    save_plot: false
+  cm_labels:
+    MI: ['LMI', 'RMI']
+
+seed: 42
+
+output_dir: 'results/Stage2_stroke'
+
+logging:
+  # Clear notebook cell output after each subject/target. No-op in a plain
+  # Python terminal.
+  clear_output: true
+  # Stage I only: also clear after each fold.
+  clear_fold: false
